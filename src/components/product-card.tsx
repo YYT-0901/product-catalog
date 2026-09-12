@@ -1,4 +1,5 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Product } from '@/models/product';
 
@@ -13,16 +14,20 @@ export function ProductCard({ item }: { item?: Product }) {
     return null;
   }
 
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const salePrice = item.price * (1 - item.discountPercentage / 100);
   const productTags = item.tags?.length ? item.tags : ['general'];
 
   return (
-    <View style={styles.card}>
-      <View style={styles.media}>
-        <Text style={styles.badge}>{item.discountPercentage}% off</Text>
+    <>
+      <View style={styles.card}>
+        <View style={styles.media}>
+          <Text style={styles.badge}>{item.discountPercentage}% off</Text>
 
-        <Image source={{ uri: item.thumbnail }} style={styles.image} resizeMode="cover" />
-      </View>
+          <Pressable onPress={() => setIsPreviewVisible(true)}>
+            <Image source={{ uri: item.thumbnail }} style={styles.image} resizeMode="cover" />
+          </Pressable>
+        </View>
 
       <View style={styles.body}>
         <View style={styles.eyebrow}>
@@ -62,6 +67,24 @@ export function ProductCard({ item }: { item?: Product }) {
         </View>
       </View>
     </View>
+
+      <Modal visible={isPreviewVisible} transparent={false} animationType="fade" onRequestClose={() => setIsPreviewVisible(false)}>
+        <View style={styles.modalContainer}>
+          <Pressable style={styles.closeButton} onPress={() => setIsPreviewVisible(false)}>
+            <Text style={styles.closeButtonText}>✕</Text>
+          </Pressable>
+
+          <Image source={{ uri: item.thumbnail }} style={styles.fullImage} resizeMode="contain" />
+
+          <View style={styles.dimensionsContainer}>
+            <Text style={styles.dimensionsTitle}>ProductDimensions</Text>
+            <Text style={styles.dimensionText}>Width: {item.dimensions.width} cm</Text>
+            <Text style={styles.dimensionText}>Height: {item.dimensions.height} cm</Text>
+            <Text style={styles.dimensionText}>Depth: {item.dimensions.depth} cm</Text>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -192,6 +215,52 @@ const styles = StyleSheet.create({
   shippingText: {
     color: '#4b5563',
     fontSize: 12,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#111827',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 56,
+    right: 20,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    zIndex: 2,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  fullImage: {
+    width: '100%',
+    height: '60%',
+    borderRadius: 24,
+    backgroundColor: '#fff',
+  },
+  dimensionsContainer: {
+    width: '100%',
+    marginTop: 18,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 18,
+    padding: 16,
+  },
+  dimensionsTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  dimensionText: {
+    color: '#f3f4f6',
+    fontSize: 14,
+    lineHeight: 22,
   },
 });
 
