@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { fetchProducts, searchProducts } from '@/api/productApi';
 import Pagination from '@/components/pagination';
 import ProductCard from '@/components/product-card';
+import ProductSkeleton from '@/components/product-skeleton';
 import Search from '@/components/ui/search';
 import type { Product } from '@/models/product';
 
@@ -87,10 +88,7 @@ export default function Page() {
 
       <View style={styles.previewPanel}>
         {isLoading ? (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator size="small" color="#111827" />
-            <Text style={styles.loadingText}>Loading products…</Text>
-          </View>
+          <ProductSkeleton count={1} />
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
         ) : (
@@ -148,16 +146,6 @@ const styles = StyleSheet.create({
   },
   cardItem: {
     width: '100%',
-  },
-  loadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
-  },
-  loadingText: {
-    fontSize: 14,
-    color: '#374151',
   },
   errorText: {
     color: '#b91c1c',
