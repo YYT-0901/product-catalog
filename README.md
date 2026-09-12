@@ -1,3 +1,7 @@
+## video
+
+<video src="assets/walkthrough_video.mp4"></video>
+
 # Product Catalog App
 
 A mobile-first product catalog built with Expo, React Native, and Expo Router. The app loads products from the DummyJSON API, supports pagination, search, image browsing, and a product detail view.
