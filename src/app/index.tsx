@@ -2,11 +2,16 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { fetchProducts } from '@/api/productApi';
+import Pagination from '@/components/pagination';
 import ProductCard from '@/components/product-card';
 import type { Product } from '@/models/product';
 
+const PAGE_SIZE = 10;
+
 export default function Page() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,11 +20,14 @@ export default function Page() {
 
     async function loadProducts() {
       try {
-        const response = await fetchProducts(0, 20);
+        setIsLoading(true);
+        const response = await fetchProducts((page - 1) * PAGE_SIZE, PAGE_SIZE);
 
         if (!isCancelled) {
           const nextProducts = response?.products ?? [];
+          const total = response?.total ?? 0;
           setProducts(nextProducts);
+          setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
           setError(nextProducts.length ? null : 'No product data returned from API.');
         }
       } catch (err) {
@@ -39,7 +47,7 @@ export default function Page() {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [page]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -58,13 +66,17 @@ export default function Page() {
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
         ) : (
-          <View style={styles.productList}>
-            {products.map((item, index) => (
-              <View key={`${item.title}-${index}`} style={styles.cardItem}>
-                <ProductCard item={item} />
-              </View>
-            ))}
-          </View>
+          <>
+            <View style={styles.productList}>
+              {products.map((item, index) => (
+                <View key={`${item.title}-${index}`} style={styles.cardItem}>
+                  <ProductCard item={item} />
+                </View>
+              ))}
+            </View>
+
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </>
         )}
       </View>
     </ScrollView>
