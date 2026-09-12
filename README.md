@@ -1,6 +1,6 @@
 ## video
 
-<video src="./assets/walkthrough_video.mp4"></video>
+[![Video Demo](./assets/video-thumbnail.png)](./assets/walkthrough_video.mp4)
 
 # Product Catalog App
 
