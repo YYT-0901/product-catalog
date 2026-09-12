@@ -83,7 +83,6 @@ export default function ProductReviews({ product }: ProductReviewsProps) {
 
 const styles = StyleSheet.create({
   reviewsSection: {
-    borderTop: '1px solid #111827',
     marginTop: 4,
     marginBottom: 8,
   },
