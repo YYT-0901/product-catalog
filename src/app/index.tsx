@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { fetchProducts } from '@/api/productApi';
+import { fetchProducts, searchProducts } from '@/api/productApi';
 import Pagination from '@/components/pagination';
 import ProductCard from '@/components/product-card';
+import Search from '@/components/ui/search';
 import type { Product } from '@/models/product';
 
 const PAGE_SIZE = 10;
@@ -14,23 +15,36 @@ export default function Page() {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [keyword, setKeyword] = useState('');
+
+  const normalizedKeyword = keyword.trim();
+  const isSearchMode = normalizedKeyword.length > 0;
 
   useEffect(() => {
     let isCancelled = false;
+    const controller = new AbortController();
 
     async function loadProducts() {
       try {
         setIsLoading(true);
-        const response = await fetchProducts((page - 1) * PAGE_SIZE, PAGE_SIZE);
+
+        const response = isSearchMode
+          ? await searchProducts(normalizedKeyword, controller.signal)
+          : await fetchProducts((page - 1) * PAGE_SIZE, PAGE_SIZE);
 
         if (!isCancelled) {
           const nextProducts = response?.products ?? [];
           const total = response?.total ?? 0;
+
           setProducts(nextProducts);
           setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
-          setError(nextProducts.length ? null : 'No product data returned from API.');
+          setError(nextProducts.length ? null : isSearchMode ? `No products found for "${normalizedKeyword}".` : 'No product data returned from API.');
         }
       } catch (err) {
+        if (controller.signal.aborted) {
+          return;
+        }
+
         if (!isCancelled) {
           setError(err instanceof Error ? err.message : 'Failed to load product.');
           setProducts([]);
@@ -46,8 +60,9 @@ export default function Page() {
 
     return () => {
       isCancelled = true;
+      controller.abort();
     };
-  }, [page]);
+  }, [page, isSearchMode, normalizedKeyword]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -56,6 +71,19 @@ export default function Page() {
           Good goods,{"\n"}Good life.
         </Text>
       </View>
+
+      <Search
+        value={keyword}
+        placeholder="Search products..."
+        onChangeText={(value) => {
+          setKeyword(value);
+          setPage(1);
+        }}
+        onClear={() => {
+          setKeyword('');
+          setPage(1);
+        }}
+      />
 
       <View style={styles.previewPanel}>
         {isLoading ? (
@@ -75,7 +103,9 @@ export default function Page() {
               ))}
             </View>
 
-            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            {!isSearchMode && (
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            )}
           </>
         )}
       </View>
