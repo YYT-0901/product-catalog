@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import type { Product } from '@/models/product';
 
@@ -14,6 +15,7 @@ export function ProductCard({ item }: { item?: Product }) {
     return null;
   }
 
+  const router = useRouter();
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const salePrice = item.price * (1 - item.discountPercentage / 100);
   const productTags = item.tags?.length ? item.tags : ['general'];
@@ -52,9 +54,12 @@ export function ProductCard({ item }: { item?: Product }) {
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => {
-              // TODO: navigate to product detail page
-            }}
+            onPress={() =>
+              router.push({
+                pathname: '/product/[id]',
+                params: { id: String(item.id) },
+              })
+            }
             style={styles.viewMoreButton}
           >
             <Text style={styles.viewMoreButtonText}>View more</Text>
