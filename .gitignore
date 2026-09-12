@@ -43,3 +43,7 @@ example
 /android
 
 .vscode
+
+app.json
+
+eas.json
